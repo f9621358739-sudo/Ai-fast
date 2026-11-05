@@ -3,142 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image & Thumbnail Generator</title>
+    <title>AI Fast - ChatGPT Image Generator</title>
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         body {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: #f8fafc;
-            min-height: 100vh;
+            background-color: #212121;
+            color: #ececec;
+            height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+        /* ChatGPT Style Header */
+        .chat-header {
+            background: #171717;
+            padding: 12px 16px;
+            display: flex;
             align-items: center;
-            padding: 20px;
+            justify-content: space-between;
+            border-bottom: 1px solid #2f2f2f;
         }
-        .header-box {
-            text-align: center;
-            margin-bottom: 15px;
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .header-box img {
-            width: 80px;
-            height: 80px;
+        .user-profile img {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: 2px solid #38bdf8;
             object-fit: cover;
-            margin-bottom: 8px;
+            border: 2px solid #10a37f;
         }
-        .welcome-text {
-            color: #38bdf8;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 5px;
+        .app-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
         }
-        .time-text {
-            color: #94a3b8;
-            font-size: 14px;
-            margin-bottom: 15px;
+        .time-badge {
+            font-size: 11px;
+            color: #b4b4b4;
+            background: #2f2f2f;
+            padding: 4px 8px;
+            border-radius: 12px;
         }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 25px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 15px;
-            color: #38bdf8;
-            font-size: 22px;
-        }
-        .input-group {
+        /* Chat Messages Container */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            margin-bottom: 15px;
+            gap: 20px;
         }
-        label {
-            font-size: 14px;
-            color: #cbd5e1;
+        .message {
+            max-width: 88%;
+            font-size: 15px;
+            line-height: 1.6;
+            word-wrap: break-word;
         }
-        select, textarea {
+        .user-message {
+            align-self: flex-end;
+            background: #2f2f2f;
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 18px 18px 4px 18px;
+        }
+        .ai-message {
+            align-self: flex-start;
             width: 100%;
-            padding: 12px;
+        }
+        .ai-card {
+            background: #171717;
+            border: 1px solid #2f2f2f;
+            border-radius: 12px;
+            padding: 14px;
+            margin-top: 8px;
+        }
+        .generated-img {
+            width: 100%;
             border-radius: 8px;
-            border: 1px solid #475569;
-            background: #0f172a;
+            margin-top: 10px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        /* Download Button */
+        .download-btn {
+            display: none;
+            margin-top: 12px;
+            background: #10a37f;
             color: white;
-            font-size: 16px;
-            outline: none;
-        }
-        textarea {
-            height: 90px;
-            resize: none;
-        }
-        select:focus, textarea:focus {
-            border-color: #38bdf8;
-        }
-        .btn {
-            background: #38bdf8;
-            color: #0f172a;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
             text-align: center;
             text-decoration: none;
-            display: block;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
         }
-        .btn:hover {
-            background: #0ea5e9;
+        .download-btn:hover {
+            background: #1a7f64;
         }
-        .btn-download {
-            background: #22c55e;
-            color: white;
-            margin-top: 15px;
-            display: none;
+        /* Input Box */
+        .input-container {
+            background: #171717;
+            padding: 12px 16px;
+            border-top: 1px solid #2f2f2f;
         }
-        .btn-download:hover {
-            background: #16a34a;
-        }
-        .result-container {
-            text-align: center;
-            margin-top: 20px;
-            min-height: 250px;
+        .input-box {
+            background: #2f2f2f;
+            border-radius: 24px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            padding: 6px 12px 6px 16px;
+        }
+        .input-box textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            resize: none;
+            height: 24px;
+            max-height: 80px;
+        }
+        .send-btn {
+            background: #10a37f;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
             justify-content: center;
             align-items: center;
-            border: 2px dashed #475569;
-            border-radius: 8px;
-            position: relative;
-            overflow: hidden;
-            padding: 10px;
         }
-        .result-container img {
-            max-width: 100%;
-            border-radius: 8px;
-            display: none;
-        }
+        /* Loader */
         .loader {
-            display: none;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #38bdf8;
+            display: inline-block;
+            border: 3px solid #333;
+            border-top: 3px solid #10a37f;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
+            margin-top: 10px;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -146,116 +162,111 @@
         }
     </style>
 </head>
-<body onload="speakWelcome()">
+<body onload="initApp()">
 
-    <div class="container">
-        <!-- Logo and Welcome -->
-        <div class="header-box">
-            <img src="https://photos.app.goo.gl/SpEbT8Ph8sd235xb6" alt="Logo">
-            <div class="welcome-text">Hello Ashish Chaudhry Sir</div>
-            <div class="time-text" id="liveTime">Loading time...</div>
+    <!-- Header -->
+    <div class="chat-header">
+        <div class="user-profile">
+            <img src="YAHAN_APNI_PHOTO_KA_DIRECT_LINK_DALO" alt="Ashish">
+            <span class="app-title">Ai Fast</span>
         </div>
+        <span class="time-badge" id="liveTime">00:00 AM</span>
+    </div>
 
-        <h2>AI Image & Thumbnail Generator</h2>
-        
-        <div class="input-group">
-            <label>Select Size / Type:</label>
-            <select id="imageSize">
-                <option value="512x512">Square (512 x 512)</option>
-                <option value="1280x720">YouTube Thumbnail (1280 x 720)</option>
-                <option value="1024x1024">HD Square (1024 x 1024)</option>
-            </select>
-
-            <label>Enter Prompt:</label>
-            <textarea id="prompt" placeholder="Jaise: A gaming thumbnail background..."></textarea>
-            
-            <button class="btn" onclick="generateImage()">Generate Image</button>
+    <!-- Chat Messages -->
+    <div class="chat-container" id="chatContainer">
+        <div class="message ai-message">
+            <div class="ai-card">
+                Hello Ashish Chaudhry Sir! Main aapka ChatGPT Image Generator assistant hoon. Aap koi bhi prompt likhein, main HD image generate kar doonga.
+            </div>
         </div>
-        
-        <div class="result-container" id="resultBox">
-            <div class="loader" id="loader"></div>
-            <img id="generatedImage" alt="AI Generated Image" crossorigin="anonymous" onload="imageLoaded()">
-            <p id="placeholderText" style="color: #94a3b8;">Aapki image yahan dikhegi...</p>
-        </div>
+    </div>
 
-        <a id="downloadBtn" class="btn btn-download" download="ai-image.jpg">Download Image</a>
+    <!-- Input Bar -->
+    <div class="input-container">
+        <div class="input-box">
+            <textarea id="promptInput" placeholder="Ask ChatGPT to generate an image..."></textarea>
+            <button class="send-btn" onclick="generateHDImage()">➔</button>
+        </div>
     </div>
 
     <script>
-        // Live Time Show Karne ke liye
-        function updateTime() {
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            let seconds = now.getSeconds();
-            let ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            seconds = seconds < 10 ? '0' + seconds : seconds;
-            
-            document.getElementById('liveTime').innerText = "Current Time: " + hours + ":" + minutes + ":" + seconds + " " + ampm;
+        function initApp() {
+            updateTime();
+            setInterval(updateTime, 1000);
+            speakText("Hello Ashish Chaudhry Sir");
         }
-        setInterval(updateTime, 1000);
-        updateTime();
 
-        // App khulte hi bolne ke liye (Voice Greeting)
-        function speakWelcome() {
+        function speakText(text) {
             if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance("Hello Ashish Chaudhry Sir");
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
                 utterance.rate = 1.0;
-                utterance.pitch = 1.0;
                 window.speechSynthesis.speak(utterance);
             }
         }
 
-        let currentImageUrl = "";
-
-        function generateImage() {
-            const promptText = document.getElementById('prompt').value.trim();
-            const sizeValue = document.getElementById('imageSize').value;
-            const loader = document.getElementById('loader');
-            const imgElement = document.getElementById('generatedImage');
-            const placeholder = document.getElementById('placeholderText');
-            const downloadBtn = document.getElementById('downloadBtn');
-
-            if (!promptText) {
-                alert('Pehle kuch prompt toh likhiye!');
-                return;
-            }
-
-            placeholder.style.display = 'none';
-            imgElement.style.display = 'none';
-            downloadBtn.style.display = 'none';
-            loader.style.display = 'block';
-
-            let width = 512;
-            let height = 512;
-            if (sizeValue === "1280x720") {
-                width = 1280;
-                height = 720;
-            } else if (sizeValue === "1024x1024") {
-                width = 1024;
-                height = 1024;
-            }
-
-            const encodedPrompt = encodeURIComponent(promptText);
-            currentImageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${width}&height=${height}&nologo=true`;
-            
-            imgElement.src = currentImageUrl;
+        function updateTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('liveTime').innerText = hours + ":" + minutes + " " + ampm;
         }
 
-        function imageLoaded() {
-            const loader = document.getElementById('loader');
-            const imgElement = document.getElementById('generatedImage');
-            const downloadBtn = document.getElementById('downloadBtn');
-            
-            loader.style.display = 'none';
-            imgElement.style.display = 'block';
-            downloadBtn.style.display = 'block';
-            downloadBtn.href = currentImageUrl;
+        async function generateHDImage() {
+            const inputField = document.getElementById('promptInput');
+            const promptText = inputField.value.trim();
+            const chatContainer = document.getElementById('chatContainer');
+
+            if (!promptText) return;
+
+            // User Chat Bubble
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user-message';
+            userMsg.innerText = promptText;
+            chatContainer.appendChild(userMsg);
+
+            inputField.value = '';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // ChatGPT Response Box
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'message ai-message';
+            aiMsg.innerHTML = `
+                <div class="ai-card">
+                    <div>Creating HD Image for: "<b>${promptText}</b>"...</div>
+                    <div class="loader" id="loader"></div>
+                    <img class="generated-img" id="resultImg" alt="ChatGPT Generated Image">
+                    <a class="download-btn" id="dlBtn" download="ai-fast-image.jpg" target="_blank">Download Image</a>
+                </div>
+            `;
+            chatContainer.appendChild(aiMsg);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // ChatGPT Style Image API URL (Flux Engine for High Detail)
+            const seed = Math.floor(Math.random() * 999999);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?width=1080&height=1350&model=flux&seed=${seed}&nologo=true`;
+
+            const imgElement = aiMsg.querySelector('#resultImg');
+            const loader = aiMsg.querySelector('#loader');
+            const dlBtn = aiMsg.querySelector('#dlBtn');
+
+            imgElement.src = imageUrl;
+            imgElement.crossOrigin = "anonymous";
+
+            imgElement.onload = function() {
+                loader.style.display = 'none';
+                imgElement.style.display = 'block';
+                dlBtn.style.display = 'block';
+                dlBtn.href = imageUrl;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                speakText("Sir, your image is ready!");
+            };
         }
     </script>
-
 </body>
 </html>
