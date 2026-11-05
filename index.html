@@ -9,9 +9,9 @@ import pyautogui
 from google import genai
 
 # -------------------------------------------------------------
-# 1. अपेक्स (Apex) क्लाइंट सेटअप (अपनी API Key यहाँ डालें)
+# 1. अपेक्स (Apex) क्लाइंट सेटअप (आपकी API Key यहाँ सेट है)
 # -------------------------------------------------------------
-os.environ["GEMINI_API_KEY"] = "YOUR_API_KEY"  # यहाँ अपनी असली API Key डालें
+os.environ["GEMINI_API_KEY"] = "AQ.Ab8RN6J3-8nuzkqNJ_-RFtEieTKzkJ-C4vD95G3OYXoiHp3kmg"
 client = genai.Client()
 
 def speak_text(text):
@@ -28,7 +28,7 @@ def speak_text(text):
         engine.say(text)
         engine.runAndWait()
 
-# आवाज़ सुनने के लिए
+# सामान्य आवाज़ सुनने के लिए
 def listen_to_user():
     r = recognizer_lib.Recognizer()
     with recognizer_lib.Microphone() as source:
@@ -42,7 +42,7 @@ def listen_to_user():
         except Exception as e:
             return None
 
-# बैकग्राउंड में 'Hello Apex' सुनने के लिए
+# बैकग्राउंड में 'Hello Apex' सुनने के लिए (Wake Word Detector)
 def wait_for_wake_word():
     r = recognizer_lib.Recognizer()
     with recognizer_lib.Microphone() as source:
@@ -71,13 +71,11 @@ def process_advanced_commands(command):
             search_query = search_query.replace(word, "")
         search_query = search_query.strip()
         
-        # यदि यूजर ने सिर्फ 'डिस्को डांस' कहा है, तो बढ़िया सा ट्रैक सेट कर दें
         if not search_query or "disco" in search_query or "डिस्को" in search_query:
-            search_query = "best disco dance track 2026 club mix"
+            search_query = "best disco dance track club mix"
             
         speak_text(f"यूट्यूब म्यूजिक से {search_query} चला रहा हूँ। कमर की पेटी बांध लीजिए!")
         encoded_query = urllib.parse.quote(search_query)
-        # YouTube Music लिंक ओपन करना
         webbrowser.open(f"https://music.youtube.com/search?q={encoded_query}")
         time.sleep(3)
         pyautogui.press('tab')
@@ -152,7 +150,7 @@ def process_advanced_commands(command):
         speak_text("स्क्रीनशॉट ले रहा हूँ।")
         screenshot = pyautogui.screenshot()
         screenshot.save("apex_screenshot.png")
-        speak_text("स्क्रीनशott सेव हो गया है।")
+        speak_text("स्क्रीनशॉट सेव हो गया है।")
         return True
 
     # G. करंट विंडो बंद करना
@@ -164,7 +162,7 @@ def process_advanced_commands(command):
     return False
 
 # -------------------------------------------------------------
-# 3. मुख्य प्रोग्राम लूप (सटीक जवाब और वेक वर्ड इंजन)
+# 3. मुख्य प्रोग्राम लूप (सटीक जवाब, वेक वर्ड और ऑटोमेशन इंजन)
 # -------------------------------------------------------------
 if __name__ == "__main__":
     print("=== 'Apex' Ultimate AI Assistant एक्टिव हो गया है ===")
@@ -184,11 +182,10 @@ if __name__ == "__main__":
                 # 1. पहले चेक करेगा कि क्या कोई ऐप, व्हाट्सएप या गाना (डिस्को ट्रैक) बजाना है
                 is_action_done = process_advanced_commands(user_input)
                 
-                # 2. अगर कोई ऐप कमांड नहीं है, तो जेमिनी मॉडल से बिल्कुल सटीक और सही जवाब प्राप्त करेगा
+                # 2. अगर कोई ऐप कमांड नहीं है, तो जेमिनी मॉडल से बिल्कुल सटीक जवाब प्राप्त करेगा
                 if not is_action_done:
                     print("🤖 अपेक्स सोच रहा है (सटीक जवाब ढूंढ रहा है)...")
                     try:
-                        # सुनिश्चित करने के लिए कि जवाब एकदम सही और स्पष्ट हो
                         response = client.models.generate_content(
                             model='gemini-2.5-flash',
                             contents=f"कृपया इस सवाल का एकदम सटीक, सही और स्पष्ट जवाब दें: {user_input}",
