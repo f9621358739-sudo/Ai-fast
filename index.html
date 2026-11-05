@@ -1,326 +1,199 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex AI - Assistant</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        }
-        body {
-            background-color: #212121;
-            color: #ececec;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .chat-header {
-            background: #171717;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #2f2f2f;
-        }
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-profile img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid #10a37f;
-        }
-        .app-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #fff;
-        }
-        .time-badge {
-            font-size: 11px;
-            color: #b4b4b4;
-            background: #2f2f2f;
-            padding: 4px 8px;
-            border-radius: 12px;
-        }
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .message {
-            max-width: 90%;
-            font-size: 14px;
-            line-height: 1.5;
-            word-wrap: break-word;
-            white-space: pre-wrap;
-        }
-        .user-message {
-            align-self: flex-end;
-            background: #2f2f2f;
-            color: #fff;
-            padding: 10px 16px;
-            border-radius: 18px 18px 4px 18px;
-        }
-        .ai-message {
-            align-self: flex-start;
-            width: 100%;
-        }
-        .ai-card {
-            background: #171717;
-            border: 1px solid #2f2f2f;
-            border-radius: 12px;
-            padding: 14px;
-            margin-top: 8px;
-        }
-        .generated-img {
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        }
-        .download-btn {
-            display: none;
-            margin-top: 12px;
-            background: #10a37f;
-            color: white;
-            text-align: center;
-            text-decoration: none;
-            padding: 10px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .input-container {
-            background: #171717;
-            padding: 12px 16px;
-            border-top: 1px solid #2f2f2f;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .options-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .ratio-select {
-            background: #2f2f2f;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 6px 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            outline: none;
-        }
-        .input-box {
-            background: #2f2f2f;
-            border-radius: 24px;
-            display: flex;
-            align-items: center;
-            padding: 6px 12px 6px 16px;
-        }
-        .input-box textarea {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 14px;
-            outline: none;
-            resize: none;
-            height: 24px;
-            max-height: 80px;
-        }
-        .send-btn {
-            background: #10a37f;
-            color: white;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 14px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .loader {
-            display: inline-block;
-            border: 3px solid #333;
-            border-top: 3px solid #10a37f;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            margin-top: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body onload="initApp()">
+import os
+import time
+import urllib.parse
+import webbrowser
+import speech_recognition as recognizer_lib
+from gtts import gTTS
+import pyttsx3
+import pyautogui
+from google import genai
 
-    <div class="chat-header">
-        <div class="user-profile">
-            <img src="YAHAN_APNI_PHOTO_KA_DIRECT_LINK_DALO" alt="Ashish">
-            <span class="app-title">Apex AI</span>
-        </div>
-        <span class="time-badge" id="liveTime">00:00 AM</span>
-    </div>
+# -------------------------------------------------------------
+# 1. अपेक्स (Apex) क्लाइंट सेटअप (अपनी API Key यहाँ डालें)
+# -------------------------------------------------------------
+os.environ["GEMINI_API_KEY"] = "YOUR_API_KEY"  # यहाँ अपनी असली API Key डालें
+client = genai.Client()
 
-    <div class="chat-container" id="chatContainer">
-        <div class="message ai-message">
-            <div class="ai-card">
-                Hello Ashish Chaudhry Sir! Main Apex AI hoon. Aap mujhse koi bhi sawal pooch sakte hain ya ratio select karke apna lamba prompt daal kar HD image generate kar sakte hain.
-            </div>
-        </div>
-    </div>
+def speak_text(text):
+    print(f"\n🔊 अपेक्स का जवाब: {text}")
+    try:
+        tts = gTTS(text=text, lang='hi', slow=False)
+        tts.save("response.mp3")
+        if os.name == 'nt':
+            os.system("start response.mp3")
+        else:
+            os.system("afplay response.mp3" if os.uname().sysname == "Darwin" else "mpg321 response.mp3")
+    except Exception as e:
+        engine = pyttsx3.init()
+        engine.say(text)
+        engine.runAndWait()
 
-    <div class="input-container">
-        <div class="options-row">
-            <label style="font-size: 12px; color: #aaa;">Image Ratio:</label>
-            <select id="ratioSelect" class="ratio-select">
-                <option value="1280,720">YouTube Thumbnail (16:9)</option>
-                <option value="1080,1080">Instagram Square (1:1)</option>
-                <option value="1080,1350">Instagram Portrait (4:5)</option>
-                <option value="1080,1920">Reels / Story (9:16)</option>
-                <option value="1920,1080">Desktop HD (16:9)</option>
-            </select>
-        </div>
+# आवाज़ सुनने के लिए
+def listen_to_user():
+    r = recognizer_lib.Recognizer()
+    with recognizer_lib.Microphone() as source:
+        print("\n🎤 अपेक्स सुन रहा है... (अपनी कमांड बोलिए)")
+        r.adjust_for_ambient_noise(source, duration=0.5)
+        try:
+            audio = r.listen(source, timeout=5, phrase_time_limit=15)
+            text = r.recognize_google(audio, language="hi-IN")
+            print(f"👤 आपने कहा: {text}")
+            return text.lower()
+        except Exception as e:
+            return None
+
+# बैकग्राउंड में 'Hello Apex' सुनने के लिए
+def wait_for_wake_word():
+    r = recognizer_lib.Recognizer()
+    with recognizer_lib.Microphone() as source:
+        r.adjust_for_ambient_noise(source, duration=0.8)
+        while True:
+            print("💤 (अपेक्स बैकग्राउंड में वेक वर्ड 'Hello Apex' का इंतज़ार कर रहा है...)")
+            try:
+                audio = r.listen(source)
+                text = r.recognize_google(audio, language="hi-IN").lower()
+                print(f"सुना गया: {text}")
+                
+                if "हैलो अपेक्स" in text or "hello apex" in text or "apex" in text or "अपेक्स" in text:
+                    print("⚡ वेक वर्ड डिटेक्ट हो गया!")
+                    return True
+            except Exception:
+                continue
+
+# -------------------------------------------------------------
+# 2. एडवांस ऐप्स, म्यूजिक और ऑटोमेशन इंजन
+# -------------------------------------------------------------
+def process_advanced_commands(command):
+    # A. डिस्क़ो डांस ट्रैक या कोई भी गाना/म्यूजिक YouTube Music / YouTube पर बजाना
+    if "disco" in command or "डिस्को" in command or "dance track" in command or "डांस ट्रैक" in command or "गाना" in command or "song" in command:
+        search_query = command
+        for word in ["youtube", "यूट्यूब", "पर", "सर्च", "करके", "बजा दो", "मंगा दो", "चला दो", "सॉन्ग", "गाना", "करो", "music", "म्यूजिक"]:
+            search_query = search_query.replace(word, "")
+        search_query = search_query.strip()
         
-        <div class="input-box">
-            <textarea id="promptInput" placeholder="Ask Apex AI to generate an image or ask anything..."></textarea>
-            <button class="send-btn" onclick="handleApexInput()">➔</button>
-        </div>
-    </div>
+        # यदि यूजर ने सिर्फ 'डिस्को डांस' कहा है, तो बढ़िया सा ट्रैक सेट कर दें
+        if not search_query or "disco" in search_query or "डिस्को" in search_query:
+            search_query = "best disco dance track 2026 club mix"
+            
+        speak_text(f"यूट्यूब म्यूजिक से {search_query} चला रहा हूँ। कमर की पेटी बांध लीजिए!")
+        encoded_query = urllib.parse.quote(search_query)
+        # YouTube Music लिंक ओपन करना
+        webbrowser.open(f"https://music.youtube.com/search?q={encoded_query}")
+        time.sleep(3)
+        pyautogui.press('tab')
+        pyautogui.press('enter')
+        return True
 
-    <script>
-        function initApp() {
-            updateTime();
-            setInterval(updateTime, 1000);
-            speakText("Hello Ashish Chaudhry Sir");
-        }
+    # B. यूट्यूब पर वीडियो/सर्च करना
+    elif "youtube" in command or "यूट्यूब" in command:
+        search_query = command
+        for word in ["youtube", "यूट्यूब", "पर", "सर्च", "करके", "बजा दो", "मंगा दो", "चला दो", "सॉन्ग", "गाना", "करो"]:
+            search_query = search_query.replace(word, "")
+        search_query = search_query.strip()
+        
+        if search_query:
+            speak_text(f"यूट्यूब पर {search_query} सर्च कर रहा हूँ।")
+            encoded_query = urllib.parse.quote(search_query)
+            webbrowser.open(f"https://www.youtube.com/results?search_query={encoded_query}")
+            time.sleep(3)
+            pyautogui.press('tab')
+            pyautogui.press('enter')
+        else:
+            speak_text("यूट्यूब खोल रहा हूँ।")
+            webbrowser.open("https://www.youtube.com")
+        return True
 
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
+    # C. व्हाट्सएप पर मैसेज भेजना
+    elif "whatsapp" in command or "व्हाट्सएप" in command:
+        speak_text("व्हाट्सएप वेब खोल रहा हूँ...")
+        webbrowser.open("https://web.whatsapp.com")
+        time.sleep(8) 
+        
+        speak_text("किसे मैसेज भेजना है और क्या लिखना है? कृपया बोलें (जैसे: राजन को लिखो हे आई एम आशीष)")
+        msg_command = listen_to_user()
+        
+        if msg_command:
+            speak_text("मैसेज टाइप करके सेंड कर रहा हूँ...")
+            pyautogui.hotkey('ctrl', 'alt', '/')
+            time.sleep(1)
+            pyautogui.write(msg_command, interval=0.05)
+            pyautogui.press('enter')
+            time.sleep(1)
+            pyautogui.press('enter')
+        return True
 
-        function updateTime() {
-            const now = new Date();
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            let ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
-            document.getElementById('liveTime').innerText = hours + ":" + minutes + " " + ampm;
-        }
+    # D. गूगल या वेब पर कुछ भी सर्च करना
+    elif "सर्च करो" in command or "search" in command or "गूगल" in command or "google" in command:
+        search_query = command
+        for word in ["google", "गूगल", "पर", "सर्च", "करो", "ढूंढो"]:
+            search_query = search_query.replace(word, "")
+        search_query = search_query.strip()
+        
+        if search_query:
+            speak_text(f"गूगल पर {search_query} सर्च कर रहा हूँ।")
+            webbrowser.open(f"https://www.google.com/search?q={urllib.parse.quote(search_query)}")
+        return True
 
-        async function handleApexInput() {
-            const inputField = document.getElementById('promptInput');
-            const text = inputField.value.trim();
-            const chatContainer = document.getElementById('chatContainer');
+    # E. नोटपैड खोलकर लिखना
+    elif "नोटपैड" in command or "notepad" in command:
+        speak_text("नोटपैड खोल रहा हूँ। आप जो बोलेंगे, मैं लिख दूंगा।")
+        os.system("notepad")
+        time.sleep(2)
+        
+        speak_text("बताइए नोटपैड में क्या लिखना है?")
+        text_to_write = listen_to_user()
+        if text_to_write:
+            pyautogui.write(text_to_write, interval=0.05)
+            speak_text("नोटपैड में लिख दिया गया है।")
+        return True
 
-            if (!text) return;
+    # F. स्क्रीनशॉट लेना
+    elif "स्क्रीनशॉट" in command or "screenshot" in command:
+        speak_text("स्क्रीनशॉट ले रहा हूँ।")
+        screenshot = pyautogui.screenshot()
+        screenshot.save("apex_screenshot.png")
+        speak_text("स्क्रीनशott सेव हो गया है।")
+        return True
 
-            const userMsg = document.createElement('div');
-            userMsg.className = 'message user-message';
-            userMsg.innerText = text;
-            chatContainer.appendChild(userMsg);
+    # G. करंट विंडो बंद करना
+    elif "विंडो बंद करो" in command or "close" in command:
+        speak_text("विंडो बंद कर रहा हूँ।")
+        pyautogui.hotkey('alt', 'f4')
+        return True
 
-            inputField.value = '';
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+    return False
 
-            const aiMsg = document.createElement('div');
-            aiMsg.className = 'message ai-message';
-            aiMsg.innerHTML = `
-                <div class="ai-card" id="aiCardContent">
-                    <div>Apex AI is processing...</div>
-                    <div class="loader" id="loader"></div>
-                </div>
-            `;
-            chatContainer.appendChild(aiMsg);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-
-            const cardContent = aiMsg.querySelector('#aiCardContent');
-
-            const lowerText = text.toLowerCase();
-            const isImage = lowerText.includes('image') || lowerText.includes('photo') || lowerText.includes('thumbnail') || lowerText.includes('banao') || lowerText.includes('draw') || lowerText.includes('wallpaper') || lowerText.includes('shriram') || lowerText.includes('lord') || lowerText.includes('cinematic') || lowerText.includes('create') || text.length > 25;
-
-            if (isImage) {
-                const ratioValue = document.getElementById('ratioSelect').value.split(',');
-                const width = ratioValue[0];
-                const height = ratioValue[1];
-
-                cardContent.innerHTML = `
-                    <div>Generating HD image (${width}x${height})...</div>
-                    <div class="loader" id="loader"></div>
-                    <img class="generated-img" id="resultImg" alt="Apex AI Image" crossorigin="anonymous">
-                    <a class="download-btn" id="dlBtn" download="apex-ai-image.jpg" target="_blank">Download Image</a>
-                `;
-
-                // Aapka poora lamba prompt bina kisi badlaav ke direct pass hoga
-                let fullPrompt = text.replace(/[“”!]/g, '');
-
-                const seed = Math.floor(Math.random() * 9999999);
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${width}&height=${height}&model=flux-realism&seed=${seed}&nologo=true`;
-
-                const imgElement = cardContent.querySelector('#resultImg');
-                const loader = cardContent.querySelector('#loader');
-                const dlBtn = cardContent.querySelector('#dlBtn');
-
-                imgElement.src = imageUrl;
-
-                imgElement.onload = function() {
-                    loader.style.display = 'none';
-                    imgElement.style.display = 'block';
-                    dlBtn.style.display = 'block';
-                    dlBtn.href = imageUrl;
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                    speakText("Sir, your image is ready!");
-                };
-
-                imgElement.onerror = function() {
-                    loader.style.display = 'none';
-                    cardContent.innerHTML = `<div>Image load hone mein error aaya. Kripya dobara koshish karein.</div>`;
-                    speakText("Sir, error loading image.");
-                };
-            } else {
-                try {
-                    const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(text)}`);
-                    const answer = await response.text();
-                    
-                    if (answer.includes("Free limit reached")) {
-                        cardContent.innerHTML = `<div>Server busy hai. Kripya kuch seconds baad try karein.</div>`;
-                        speakText("Sir, server is busy.");
-                    } else {
-                        cardContent.innerHTML = `<div>${answer}</div>`;
-                        chatContainer.scrollTop = chatContainer.scrollHeight;
-                        speakText(answer);
-                    }
-                } catch (error) {
-                    cardContent.innerHTML = `<div>Network error. Kripya dobara try karein.</div>`;
-                    speakText("Sir, network error.");
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+# -------------------------------------------------------------
+# 3. मुख्य प्रोग्राम लूप (सटीक जवाब और वेक वर्ड इंजन)
+# -------------------------------------------------------------
+if __name__ == "__main__":
+    print("=== 'Apex' Ultimate AI Assistant एक्टिव हो गया है ===")
+    print("💡 टिप: बैकग्राउंड में 'Hello Apex' बोलें, और अपने हर सवाल का सटीक जवाब पाएं!")
+    
+    while True:
+        if wait_for_wake_word():
+            speak_text("हाँ, बोलिए मैं सुन रहा हूँ!")
+            
+            user_input = listen_to_user()
+            
+            if user_input:
+                if "बाहर निकलो" in user_input or "exit" in user_input or "बंद हो जाओ" in user_input:
+                    speak_text("अलविदा! फिर मिलेंगे।")
+                    break
+                
+                # 1. पहले चेक करेगा कि क्या कोई ऐप, व्हाट्सएप या गाना (डिस्को ट्रैक) बजाना है
+                is_action_done = process_advanced_commands(user_input)
+                
+                # 2. अगर कोई ऐप कमांड नहीं है, तो जेमिनी मॉडल से बिल्कुल सटीक और सही जवाब प्राप्त करेगा
+                if not is_action_done:
+                    print("🤖 अपेक्स सोच रहा है (सटीक जवाब ढूंढ रहा है)...")
+                    try:
+                        # सुनिश्चित करने के लिए कि जवाब एकदम सही और स्पष्ट हो
+                        response = client.models.generate_content(
+                            model='gemini-2.5-flash',
+                            contents=f"कृपया इस सवाल का एकदम सटीक, सही और स्पष्ट जवाब दें: {user_input}",
+                        )
+                        ai_reply = response.text
+                        speak_text(ai_reply)
+                    except Exception as e:
+                        speak_text(f"क्षमा करें, जवाब ढूंढने में त्रुटि आई है: {e}")
