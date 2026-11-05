@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apex - AI Assistant</title>
+    <title>Apex AI - Assistant</title>
     <style>
         * {
             box-sizing: border-box;
@@ -184,7 +184,7 @@
     <div class="chat-container" id="chatContainer">
         <div class="message ai-message">
             <div class="ai-card">
-                Hello Ashish Chaudhry Sir! Main Apex hoon. Aap mujhse koi bhi sawal pooch sakte hain ya ratio select karke HD image generate kar sakte hain.
+                Hello Ashish Chaudhry Sir! Main Apex AI hoon. Aap mujhse koi bhi sawal pooch sakte hain ya ratio select karke apna lamba prompt daal kar HD image generate kar sakte hain.
             </div>
         </div>
     </div>
@@ -202,7 +202,7 @@
         </div>
         
         <div class="input-box">
-            <textarea id="promptInput" placeholder="Ask Apex to generate an image or ask anything..."></textarea>
+            <textarea id="promptInput" placeholder="Ask Apex AI to generate an image or ask anything..."></textarea>
             <button class="send-btn" onclick="handleApexInput()">➔</button>
         </div>
     </div>
@@ -252,7 +252,7 @@
             aiMsg.className = 'message ai-message';
             aiMsg.innerHTML = `
                 <div class="ai-card" id="aiCardContent">
-                    <div>Apex is thinking...</div>
+                    <div>Apex AI is processing...</div>
                     <div class="loader" id="loader"></div>
                 </div>
             `;
@@ -261,9 +261,8 @@
 
             const cardContent = aiMsg.querySelector('#aiCardContent');
 
-            // Smart check: Agar lamba prompt hai ya image/thumbnail/banao j jaise shabd hain toh image banayega
             const lowerText = text.toLowerCase();
-            const isImage = lowerText.includes('image') || lowerText.includes('photo') || lowerText.includes('thumbnail') || lowerText.includes('banao') || lowerText.includes('draw') || lowerText.includes('wallpaper') || lowerText.includes('shriram') || lowerText.includes('lord') || text.length > 40;
+            const isImage = lowerText.includes('image') || lowerText.includes('photo') || lowerText.includes('thumbnail') || lowerText.includes('banao') || lowerText.includes('draw') || lowerText.includes('wallpaper') || lowerText.includes('shriram') || lowerText.includes('lord') || lowerText.includes('cinematic') || lowerText.includes('create') || text.length > 25;
 
             if (isImage) {
                 const ratioValue = document.getElementById('ratioSelect').value.split(',');
@@ -274,12 +273,14 @@
                     <div>Generating HD image (${width}x${height})...</div>
                     <div class="loader" id="loader"></div>
                     <img class="generated-img" id="resultImg" alt="Apex AI Image" crossorigin="anonymous">
-                    <a class="download-btn" id="dlBtn" download="apex-image.jpg" target="_blank">Download Image</a>
+                    <a class="download-btn" id="dlBtn" download="apex-ai-image.jpg" target="_blank">Download Image</a>
                 `;
 
-                // Improved URL encoding and Flux Engine parameters for precise rendering
-                const seed = Math.floor(Math.random() * 10000000);
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(text)}?width=${width}&height=${height}&model=flux&seed=${seed}&nologo=true`;
+                // Aapka poora lamba prompt bina kisi badlaav ke direct pass hoga
+                let fullPrompt = text.replace(/[“”!]/g, '');
+
+                const seed = Math.floor(Math.random() * 9999999);
+                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(fullPrompt)}?width=${width}&height=${height}&model=flux-realism&seed=${seed}&nologo=true`;
 
                 const imgElement = cardContent.querySelector('#resultImg');
                 const loader = cardContent.querySelector('#loader');
@@ -298,7 +299,7 @@
 
                 imgElement.onerror = function() {
                     loader.style.display = 'none';
-                    cardContent.innerHTML = `<div>Image load hone mein error aaya. Dobara koshish karein.</div>`;
+                    cardContent.innerHTML = `<div>Image load hone mein error aaya. Kripya dobara koshish karein.</div>`;
                     speakText("Sir, error loading image.");
                 };
             } else {
