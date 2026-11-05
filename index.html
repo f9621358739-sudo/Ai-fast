@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator App</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #38bdf8;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+        }
+        textarea:focus {
+            border-color: #38bdf8;
+        }
+        button {
+            background: #38bdf8;
+            color: #0f172a;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: #0ea5e9;
+        }
+        .result-container {
+            text-align: center;
+            margin-top: 20px;
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed #475569;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+        .result-container img {
+            max-width: 100%;
+            border-radius: 8px;
+            display: none;
+        }
+        .loader {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #38bdf8;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>AI Image Generator</h2>
+        <div class="input-group">
+            <textarea id="prompt" placeholder="Aapko kaisi image chahiye yahan type karein (Jaise: A cute cat wearing astronaut suit)..."></textarea>
+            <button onclick="generateImage()">Generate Image</button>
+        </div>
+        
+        <div class="result-container" id="resultBox">
+            <div class="loader" id="loader"></div>
+            <img id="generatedImage" alt="AI Generated Image" onload="imageLoaded()">
+            <p id="placeholderText" style="color: #94a3b8;">Aapki image yahan dikhegi...</p>
+        </div>
+    </div>
+
+    <script>
+        function generateImage() {
+            const promptText = document.getElementById('prompt').value.trim();
+            const loader = document.getElementById('loader');
+            const imgElement = document.getElementById('generatedImage');
+            const placeholder = document.getElementById('placeholderText');
+
+            if (!promptText) {
+                alert('Pehle kuch text/prompt toh likhiye!');
+                return;
+            }
+
+            // UI ko loading state mein karein
+            placeholder.style.display = 'none';
+            imgElement.style.display = 'none';
+            loader.style.display = 'block';
+
+            // Pollinations AI URL generate karna
+            const encodedPrompt = encodeURIComponent(promptText);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=512&height=512&nologo=true`;
+
+            // Image load karna
+            imgElement.src = imageUrl;
+        }
+
+        function imageLoaded() {
+            const loader = document.getElementById('loader');
+            const imgElement = document.getElementById('generatedImage');
+            
+            loader.style.display = 'none';
+            imgElement.style.display = 'block';
+        }
+    </script>
+
+</body>
+</html>
